@@ -1,4 +1,4 @@
-import { EventBus } from "../../eventBus";
+import { EventBus } from "./EventBus";
 import { promiseMixin } from "./promiseMixin";
 
 export const eventMixin = {
@@ -10,7 +10,7 @@ export const eventMixin = {
       if (timeout) {
         Promise.race([
           resolvablePromise["promise"],
-          new Promise((_r, rej) => setTimeout(rej, timeout)),
+          new Promise((resolve, reject) => setTimeout(reject, timeout)),
         ]);
       }
       return resolvablePromise["promise"];

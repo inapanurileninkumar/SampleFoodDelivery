@@ -1,1 +1,136 @@
+$spacingLengths: (
+  none: 0,
+  auto: auto,
+  0: 0,
+  2: 2px,
+  3: 3px,
+  5: 5px,
+  7: 7px,
+  10: 10px,
+  15: 15px,
+  20: 20px,
+  30: 30px
+);
 
+$spacingDirections: (
+  '': (
+    top,
+    left,
+    right,
+    bottom
+  ),
+  t: (
+    top
+  ),
+  l: (
+    left
+  ),
+  b: (
+    bottom
+  ),
+  r: (
+    right
+  ),
+  v: (
+    top,
+    bottom
+  ),
+  h: (
+    left,
+    right
+  ),
+  tr: (
+    top,
+    right
+  ),
+  tl: (
+    top,
+    left
+  ),
+  br: (
+    bottom,
+    right
+  ),
+  bl: (
+    bottom,
+    left
+  ),
+  th: (
+    top,
+    left,
+    right
+  ),
+  bh: (
+    bottom,
+    left,
+    right
+  ),
+  vl: (
+    top,
+    bottom,
+    left
+  ),
+  vr: (
+    top,
+    bottom,
+    right
+  )
+);
+@each $spacingSize, $spacingValue in $spacingLengths {
+  .border-radius-#{$spacingSize} {
+    border-radius: $spacingValue;
+  }
+  .border-radius-bottom-left-#{$spacingSize} {
+    border-bottom-left-radius: #{$spacingValue};
+  }
+  .border-radius-bottom-right-#{$spacingSize} {
+    border-bottom-right-radius: #{$spacingValue};
+  }
+  .border-radius-top-left-#{$spacingSize} {
+    border-top-left-radius: #{$spacingValue};
+  }
+  .border-radius-top-right-#{$spacingSize} {
+    border-top-right-radius: #{$spacingValue};
+  }
+  @each $spacingDirection, $stylingDirections in $spacingDirections {
+    .m#{$spacingDirection}-#{$spacingSize} {
+      @each $stylingDirection in $stylingDirections {
+        margin-#{$stylingDirection}: #{$spacingValue};
+      }
+    }
+    .m#{$spacingDirection}--#{$spacingSize} {
+      @each $stylingDirection in $stylingDirections {
+        @if ($spacingValue == auto) {
+          margin-#{$stylingDirection}: $spacingValue;
+        } @else {
+          margin-#{$stylingDirection}: (-1 * $spacingValue);
+        }
+      }
+    }
+    .p#{$spacingDirection}-#{$spacingSize} {
+      @each $stylingDirection in $stylingDirections {
+        padding-#{$stylingDirection}: #{$spacingValue};
+      }
+    }
+  }
+}
+
+.text-bold {
+  font-weight: bold;
+}
+.text-title {
+  color: #434555;
+}
+.pointer-cursor {
+  cursor: pointer;
+}
+.text-capitalized {
+  text-transform: capitalize;
+}
+.text-underline {
+  text-decoration: underline;
+}
+.ellipsis-word {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

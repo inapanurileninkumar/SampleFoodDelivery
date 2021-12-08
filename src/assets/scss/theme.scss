@@ -1,0 +1,65 @@
+$colors: (
+  '-success': (
+    '-lite': #7cbe7c,
+    '': #48c479,
+    '-dark': #60b246
+  ),
+  '-warning': (
+    'dark': #db7c38,
+    '': #ffa500,
+    '-lite': #e1b055
+  ),
+  '-info': (
+    '': #6090d6,
+    '-lite': #90abd4
+  ),
+  '-secondary': (
+    '-lite': #dedede,
+    '': #808080,
+    '-dark': #4a4a4a
+  ),
+  '-danger': (
+    '-lite': #f26238,
+    '': #b84c2c,
+    '-dark': #843821
+  ),
+  '-white': (
+    '': white
+  )
+);
+
+@each $colorCategoryName, $colorCategories in $colors {
+  @each $colorType, $colorTypeValue in $colorCategories {
+    .text#{$colorCategoryName}#{$colorType} {
+      color: $colorTypeValue;
+    }
+    .hover-text#{$colorCategoryName}#{$colorType} {
+      transition: all 0.25s ease-in-out;
+      &:hover {
+        color: $colorTypeValue;
+      }
+    }
+    .bg#{$colorCategoryName}#{$colorType} {
+      background-color: $colorTypeValue;
+    }
+
+    $borderLenMap: (
+      '': 1px,
+      '-1': 1px,
+      '-2': 2px
+    );
+    @each $borderLen, $borderLenVal in $borderLenMap {
+      .bordered#{$colorCategoryName}#{$colorType}#{$borderLen} {
+        border: $borderLenVal solid $colorTypeValue;
+      }
+      .bordered#{$colorCategoryName}#{$colorType}#{$borderLen}-dashed {
+        border: $borderLenVal dashed $colorTypeValue;
+      }
+      .hover-bordered#{$colorCategoryName}#{$colorType}#{$borderLen} {
+        &:hover {
+          border: $borderLenVal solid $colorTypeValue;
+        }
+      }
+    }
+  }
+}

@@ -1,11 +1,19 @@
 export const restaurants = {
   namespaced: true,
-  sate: {
+  state: {
     restaurants: [],
   },
-  getteers: {
+  getters: {
     getRestaurants: (state) => state["restaurants"],
   },
-  actions: {},
-  mutations: {},
+  actions: {
+    addRestaurant: function (store, restaurant) {
+      store.commit("ADD_RESTAURANT", restaurant);
+    },
+  },
+  mutations: {
+    ADD_RESTAURANT: function (state, restaurant) {
+      state["restaurants"].push(restaurant);
+    },
+  },
 };

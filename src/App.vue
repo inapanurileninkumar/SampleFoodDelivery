@@ -1,32 +1,50 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div
+    class="flex-row justify-content-center"
+    >
+      <div
+        class="flex-col-12"
+      >
+      <nav-bar/>
+        <router-view/>
+      </div>
     </div>
-    <router-view/>
   </div>
 </template>
-
+<script>
+import NavBar from "./components/utils/NavBar.vue";
+import { restaurantModel } from "./models/restaurantModel";
+import { mapGetters, mapActions } from "vuex";
+export default {
+  components: { NavBar, },
+  mixins: [restaurantModel],
+  computed: {
+    ...(mapGetters({
+      getRestaurants: "restaurants/getRestaurants",
+    })),
+  },
+  beforeMount: function () {
+    this.setupApp();
+  },
+  methods: {
+    ...(mapActions({
+      addRestaurant: "restaurants/addRestaurant",
+    })),
+    setupApp: function () {
+      if (this.getRestaurants.length) return;
+      let numberOfRestaurants = this.getRandomNumber(30, 50);
+      for (let i = 0; i < numberOfRestaurants; i++) {
+        this.addRestaurant(this.getRandomRestaurant());
+      }
+    },
+  },
+};
+</script>
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
 }
 </style>

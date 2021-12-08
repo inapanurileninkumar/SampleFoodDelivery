@@ -1,0 +1,48 @@
+@mixin flex-box {
+  display: flex;
+}
+
+$flex-directions: (
+  'start': flex-start,
+  'center': center,
+  'end': flex-end
+);
+
+$justification-directions: (
+  'start': start,
+  'center': center,
+  'end': end,
+  'space-between': space-between,
+  'space-around': space-around,
+  'space-evenly': space-evenly
+);
+
+.flex-row {
+  @include flex-box;
+  width: 100%;
+  max-width: 100%;
+
+  &.wrap {
+    flex-wrap: wrap;
+  }
+
+  @each $flexDirection, $flexDirectionValue in $flex-directions {
+    &.align-items-#{$flexDirection} {
+      align-items: #{$flexDirectionValue};
+    }
+  }
+  @each $justificationDirection,
+    $justificationDirectionValue in $justification-directions
+  {
+    &.justify-content-#{$justificationDirection} {
+      justify-content: #{$justificationDirectionValue};
+    }
+  }
+}
+
+@for $colSpan from 1 through 12 {
+  .flex-col-#{$colSpan} {
+    min-width: calc((100% / 12) * #{$colSpan});
+    max-width: calc((100% / 12) * #{$colSpan});
+  }
+}
