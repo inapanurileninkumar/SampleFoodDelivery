@@ -59,6 +59,7 @@ export const restaurantModel = {
       }));
       restaurant["deliveryTime"] = this.getRandomNumber(10, 65);
       restaurant["location"] = this.getRandomLocation();
+      restaurant["distance"] = this.getRandomNumber(800, 5000);
       return restaurant;
     },
     getRestaurantItemModel: function () {
@@ -77,6 +78,7 @@ export const restaurantModel = {
           categories: [],
         },
         offers: [],
+        distance: 0,
       };
     },
   },

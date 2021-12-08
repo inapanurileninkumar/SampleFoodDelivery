@@ -8,8 +8,7 @@
         class="flex-row"
       >
         <div
-          class="flex-col-3"
-          style="position:sticky;top:80px"
+          class="flex-col-3 max-allowed-container-navbar overflow-y-auto"
         >
           <div 
             v-for="(category,categoryIndex) in restaurantCategories"
@@ -17,14 +16,14 @@
             class="flex-row justify-content-end"
           >
             <span
-              class="mt-10 pr-10 text-capitalized"
+              class="mt-10 pr-10 text-capitalized text-bold"
             >
               {{ category['label'] }}
             </span>
           </div>
         </div>
         <div
-          class="flex-col-5 ph-30"
+          class="flex-col-5 ph-30 max-allowed-container-navbar overflow-y-auto"
           style="border-left:1px solid lightgray;"
         >
           <div>
@@ -74,15 +73,18 @@
             v-if="cartItems.length"
           >
             <div
-              class="text-bold"
-              style="font-size:20pt;"
+              class="cart-title-container"
             >
-              <span>Cart</span>
-            </div>
-            <div
-              class="ml-3"
-              style="font-size:10pt;"
-            >
+              <div
+                class="text-bold"
+                style="font-size:20pt;"
+              >
+                <span>Cart</span>
+              </div>
+              <div
+                class="ml-3"
+                style="font-size:10pt;"
+              >
                 <span
                   class="text-secondary"
                 >
@@ -101,25 +103,36 @@
                     </span>
                   </div>
                 </template>
-                <cart-items 
-                  :restaurant="restaurant"
-                  @event-emitted="handleFoodItemEvent"
-                />
-                <div
-                  class="mt-10 flex-row align-items-center justify-content-space-between"
+              </div>
+            </div>
+            <div
+              :style="{'max-height':cartItemsMaxHeight+'px'}"
+              class="overflow-y-auto overflow-x-hidden"
+            >
+              <cart-items 
+                :restaurant="restaurant"
+                @event-emitted="handleFoodItemEvent"
+              />
+            </div>
+            <div
+              class="cart-sum-container mt-5"
+              style="border-top:2px solid black;"
+            >
+              <div
+                class="mt-10 flex-row align-items-center justify-content-space-between"
+              >
+                <span
+                  class="text-bold"
+                  style="font-size: 14pt;"
                 >
-                  <span
-                    class="text-bold"
-                    style="font-size: 14pt;"
-                  >
-                    Subtotal
-                  </span>
-                  <span
-                    class="text-bold"
-                  >
-                    <i class="fas fa-rupee-sign" />
-                    {{ getSubTotal }}
-                  </span>
+                  Subtotal
+                </span>
+                <span
+                  class="text-bold"
+                >
+                  <i class="fas fa-rupee-sign" />
+                  {{ getSubTotal }}
+                </span>
               </div>
               <div
                 class="mt-20 pv-15 text-white bg-success-dark pointer-cursor flex-row align-items-center justify-content-center"
@@ -180,7 +193,8 @@ export default {
             }
           ]
         }
-      }
+      },
+      cartItemsMaxHeight: 0,
     };
   },
   computed: {
@@ -211,10 +225,20 @@ export default {
   watch: {
     restaurantId: function () {
       this.setupRestaurant();
+    },
+    cartItems: function () {
+      this.calculateCartItemsMaxHeight();
     }
   },
   beforeMount: function () {
     this.setupRestaurant();
+  },
+  mounted: function () {
+    this.calculateCartItemsMaxHeight();
+    window.addEventListener("resize", this.calculateCartItemsMaxHeight);
+  },
+  beforeDestroy: function () {
+    window.removeEventListener("resize", this.calculateCartItemsMaxHeight);
   },
   methods: {
     ...(mapActions({
@@ -260,6 +284,18 @@ export default {
     },
     goToCartRestaurant: function () {
       this.routeTo("Restaurant", { restaurantId: this.cartRestaurant });
+    },
+    calculateCartItemsMaxHeight: function () {
+      let heightToSubtrack = 85 + 40;
+      let elementsToRemoveHeight = [
+        "cart-sum-container", "cart-title-container"
+      ];
+      elementsToRemoveHeight.forEach(elementToRemoveHeight => {
+        let element = document.getElementsByClassName(elementToRemoveHeight);
+        if (element.length > 0)element = element[0];
+        heightToSubtrack += element.offsetHeight;
+      });
+      this.cartItemsMaxHeight = window.innerHeight - heightToSubtrack;
     },
     // DIALOG METHODS
     openDialog: function (config, data) {

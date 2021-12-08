@@ -1,7 +1,6 @@
-/* eslint-disable semi */
 <template>
   <div
-    class="flex-row justify-content-center pt-30"
+    class="flex-row justify-content-center pt-30 max-allowed-container-navbar overflow-y-auto"
   >
     <div
     class="flex-col-10"

@@ -1,12 +1,12 @@
 <template>
   <div id="app">
     <div
-    class="flex-row justify-content-center"
+      class="flex-row justify-content-center"
     >
       <div
         class="flex-col-12"
       >
-      <nav-bar/>
+        <nav-bar/>
         <router-view/>
       </div>
     </div>

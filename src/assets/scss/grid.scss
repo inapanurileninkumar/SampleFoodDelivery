@@ -19,8 +19,6 @@ $justification-directions: (
 
 .flex-row {
   @include flex-box;
-  width: 100%;
-  max-width: 100%;
 
   &.wrap {
     flex-wrap: wrap;

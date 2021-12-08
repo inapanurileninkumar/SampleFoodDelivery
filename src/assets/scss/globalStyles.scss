@@ -1,3 +1,73 @@
+// MAX ALLOWED CONTAINER CLASSES
+$heightContainers: (
+  'navbar': 85px
+);
+@each $containerName, $containerHeight in $heightContainers {
+  .max-allowed-container-#{$containerName} {
+    min-height: calc(100vh - #{$containerHeight});
+    max-height: calc(100vh - #{$containerHeight});
+  }
+}
+
+// CONTENT OVERFLOW CLASSES
+$overflowDirections: (
+  'y': (
+    'y'
+  ),
+  'x': (
+    'x'
+  ),
+  'both': (
+    'x',
+    'y'
+  )
+);
+$overflowTypes: ('hidden', 'auto');
+@each $overflow, $overflowDirections in $overflowDirections {
+  @each $overflowType in $overflowTypes {
+    .overflow-#{$overflow}-#{$overflowType} {
+      @each $prop in $overflowDirections {
+        overflow-#{$prop}: #{$overflowType};
+      }
+    }
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(179, 177, 177, 0.3);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+.text-bold {
+  font-weight: bold;
+}
+.text-title {
+  color: #434555;
+}
+.pointer-cursor {
+  cursor: pointer;
+}
+.text-capitalized {
+  text-transform: capitalize;
+}
+.text-underline {
+  text-decoration: underline;
+}
+.ellipsis-word {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+//PADDING, MARGIN & BORDER CLASSES
 $spacingLengths: (
   none: 0,
   auto: auto,
@@ -113,24 +183,4 @@ $spacingDirections: (
       }
     }
   }
-}
-
-.text-bold {
-  font-weight: bold;
-}
-.text-title {
-  color: #434555;
-}
-.pointer-cursor {
-  cursor: pointer;
-}
-.text-capitalized {
-  text-transform: capitalize;
-}
-.text-underline {
-  text-decoration: underline;
-}
-.ellipsis-word {
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
