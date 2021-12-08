@@ -7,8 +7,127 @@
         class="flex-col-10"
       >
         <div class="flex-row">
-          <div class="flex-col-8">
-            <p>hello world</p>
+          <div class="flex-col-8 pr-50">
+            <div
+              class="max-allowed-container-checkout-billing border-radius-5 overflow-y-auto"
+            >
+              <!-- Address selector -->
+              <div 
+                class="checkout-billing-section bg-white p-50"
+              >
+                <h2>
+                  <span>
+                    <i class="fas fa-map-marker-alt text-success-dark" />
+                  </span>
+                  <span>
+                    {{ selectedAddress?'Delivery Address':'Choose A Delivery Address' }}
+                  </span>
+                </h2>
+                <template
+                  v-if="selectedAddress"
+                >
+                  <div
+                    class="flex-row"
+                  >
+                    <div
+                      class="flex-col-8"
+                    >
+                      <Address
+                        :address="userAddresses.find(userAddress=>userAddress['uuid']===selectedAddress)"
+                      />
+                    </div>
+                    <div
+                      class="flex-col-4"
+                    >
+                      <div
+                        class="flex-row align-items-end justify-content-end"
+                        style="height:100%"
+                      >
+                        <span
+                          class="ph-20 pv-10 bg-warning text-white pointer-cursor border-radius-2"
+                          @click="selectedAddress=null"
+                        >
+                          <i class="fas fa-pencil-alt" />
+                          CHANGE
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <template
+                  v-else
+                >
+                  <span class="text-secondary">Select a location to deliver</span>
+                  <div 
+                    class="flex-row wrap justify-content-space-between"
+                  >
+                    <div
+                      v-for="(userAddress,userAddressIndex) in userAddresses"
+                      :key="userAddress['uuid']+'_'+userAddressIndex"
+                      class="flex-col-6"
+                    >
+                      <div
+                        class="pv-20 pr-30"
+                      >
+                        <Address 
+                          :address="userAddress"
+                          class="bordered-secondary-lite pointer-cursor border-radius-3 address-container"
+                          style="height:200px;"
+                          mode="checkout"
+                          @click.native="selectedAddress=userAddress['uuid']"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              <!-- Payment Section -->
+              <div 
+                class="checkout-billing-section bg-white p-50 mt-20"
+              >
+                <h2>
+                  <span>
+                    <i class="fas fa-wallet text-success-dark" />
+                  </span>
+                  Payment Method
+                </h2>
+                <template
+                  v-if="selectedAddress"
+                >
+                  <span class="text-secondary">Select a payment method</span>
+                  <div 
+                    class="flex-row mt-20"
+                  >
+                   <div
+                    class="flex-col-4 bg-info-lite pvl-20 paymet-type-container"
+                   >
+                      <div 
+                        v-for="(paymentType,paymentTypeIndex) in paymentTypes"
+                        :key="paymentType['name']+'_'+paymentTypeIndex"
+                        :class="[activePaymentType===paymentType['name']?'bg-white text-bold':'text-white']"
+                        class="text-title pv-20 ph-10 pointer-cursor"
+                        style="font-size:14pt;letter-spacing:1px;"
+                        @click="activePaymentType=paymentType['name']"
+                      >
+                        <i :class="paymentType['icon']" />
+                        <span
+                          class="ml-10"
+                        >
+                          {{ paymentType['label'] }}
+                        </span>
+                      </div>
+                   </div>
+                    <div
+                      class="flex-col-8 bordered-success pvl-20 bordered-secondary-lite overflow-y-auto"
+                      :style="{'max-height':paymentModeContainerHeight+'px'}"
+                      style="border-left:none;"
+                    >
+                      
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
           </div>
           <div 
             class="flex-col-4"
@@ -52,7 +171,7 @@
                 style="font-size:9pt;"
               >
                 <div
-                  class="title-text text-bold" 
+                  class="text-title text-bold" 
                 >
                   <span>
                     Bill Details
@@ -113,20 +232,59 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
+import Address from "../components/Address.vue";
 import CartItems from "../components/utils/CartItems.vue";
 export default {
-  components: { CartItems },
+  components: { CartItems, Address },
   name: "Checkout",
   data: function () {
     return {
       cartItemsMaxHeight: 0,
+      selectedAddress: null,
+      activePaymentType: "wallet",
+      // SAMPLE PAYMENT TYPES
+      paymentTypes: [
+        {
+          name: "wallet",
+          label: "Wallets",
+          icon: "fas fa-wallet"
+        },
+        {
+          name: "card",
+          label: "Credit/Debit Cards",
+          icon: "far fa-credit-card"
+        },
+        {
+          name: "upi",
+          label: "UPI",
+          icon: "fab fa-google-pay"
+        },
+        {
+          name: "netbanking",
+          label: "Net Banking",
+          icon: "fas fa-university"
+        },
+        {
+          name: "foodcard",
+          label: "Food Cards",
+          icon: "fas fa-money-check-alt"
+        },
+        {
+          name: "cod",
+          label: "Pay on Delivery",
+          icon: "fas fa-money-bill-alt"
+        },
+      ],
+      // DOM
+      paymentModeContainerHeight: 0,
     };
   },
   computed: {
     ...mapGetters({
       cartItems: "cart/getCartItems",
       cartRestaurant: "cart/getCartRestaurant",
-      availableRestaurants: "restaurants/getRestaurants"
+      availableRestaurants: "restaurants/getRestaurants",
+      userAddresses: "user/getAddresses"
     }),
     getCartRestaurantData: function () {
       return this.availableRestaurants.find(restaurant => restaurant["uuid"] === this.cartRestaurant);
@@ -147,16 +305,30 @@ export default {
   watch: {
     cartItems: function () {
       this.calculateCartItemsMaxHeight();
+    },
+    selectedAddress: function () {
+      this.$nextTick(() => {
+        if (this.selectedAddress) {
+          this.calculatePaymentModeMaxHeight();
+        }
+      });
     }
   },
   mounted: function () {
     this.calculateCartItemsMaxHeight();
+    this.calculatePaymentModeMaxHeight();
     window.addEventListener("resize", this.calculateCartItemsMaxHeight);
   },
   beforeDestroy: function () {
     window.removeEventListener("resize", this.calculateCartItemsMaxHeight);
   },
   methods: {
+    calculatePaymentModeMaxHeight: function () {
+      let paymentTypeContainer = document.getElementsByClassName("paymet-type-container")[0];
+      if (paymentTypeContainer) {
+        this.paymentModeContainerHeight = paymentTypeContainer.getBoundingClientRect()["height"];
+      }
+    },
     calculateCartItemsMaxHeight: function () {
       let heightToSubtrack = 85 + 100;
       let elementsToRemoveHeight = [
@@ -175,5 +347,14 @@ export default {
 <style scoped lang="scss">
   .checkout-container{
     background:#e9ecee;
+  }
+  .checkout-billing-section{
+    min-height:100px;
+  }
+  .address-container{
+    transition: all 0.25s ease-in-out;
+    &:hover{
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    }
   }
 </style>

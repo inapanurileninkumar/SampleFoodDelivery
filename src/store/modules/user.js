@@ -6,12 +6,19 @@ export const user = {
       firstName: "James",
       lastName: "Peterson",
     },
-    cart: {
-      activeRestaurant: null,
-      items: [],
+    addresses: [],
+  },
+  getters: {
+    getAddresses: (state) => state["addresses"],
+  },
+  actions: {
+    addAddress: function (store, address) {
+      store.commit("ADD_ADDRESS", address);
     },
   },
-  getters: {},
-  actions: {},
-  mutations: {},
+  mutations: {
+    ADD_ADDRESS: function (state, address) {
+      state["addresses"].push(address);
+    },
+  },
 };

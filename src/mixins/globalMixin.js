@@ -12,6 +12,19 @@ export const globalMixin = {
         return v.toString(16);
       });
     },
+    getRandomLocation: function () {
+      let locations = [
+        "Kondapur",
+        "Madhapur",
+        "Gachibowli",
+        "Uppal",
+        "Miyapur",
+        "Kukatpally",
+        "Jubilee Hills",
+        "Kothaguda",
+      ];
+      return locations[this.getRandomNumber(0, locations.length)];
+    },
     getRandomString: function (length, includeInts = true) {
       var result = "";
       var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz";

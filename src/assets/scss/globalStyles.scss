@@ -1,6 +1,7 @@
 // MAX ALLOWED CONTAINER CLASSES
 $heightContainers: (
-  'navbar': 85px
+  'navbar': 85px,
+  'checkout-billing': 135px
 );
 @each $containerName, $containerHeight in $heightContainers {
   .max-allowed-container-#{$containerName} {
@@ -79,7 +80,8 @@ $spacingLengths: (
   10: 10px,
   15: 15px,
   20: 20px,
-  30: 30px
+  30: 30px,
+  50: 50px
 );
 
 $spacingDirections: (

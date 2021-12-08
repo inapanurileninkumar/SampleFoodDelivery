@@ -40,6 +40,7 @@
               style="font-size:15pt;"
               placeholder="Search Restaurants"
               class="search-input text-warning text-bold pv-10 ph-20"
+              @keyup.esc="closeRestaurantSearch"
             />
             <span
               class="pointer-cursor search-close text-secondary-lite hover-text-secondary"

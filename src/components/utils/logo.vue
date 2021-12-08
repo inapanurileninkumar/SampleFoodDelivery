@@ -4,7 +4,7 @@
         viewBox="0 0 16 25"
         height="49" 
         width="34"
-        fill="lightgreen"
+        fill="#f26238"
     >
         <path
             d="

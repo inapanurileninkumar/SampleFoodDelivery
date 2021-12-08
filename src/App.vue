@@ -15,10 +15,11 @@
 <script>
 import NavBar from "./components/utils/NavBar.vue";
 import { restaurantModel } from "./models/restaurantModel";
+import { addressModel } from "./models/addressModel";
 import { mapGetters, mapActions } from "vuex";
 export default {
   components: { NavBar, },
-  mixins: [restaurantModel],
+  mixins: [restaurantModel, addressModel],
   computed: {
     ...(mapGetters({
       getRestaurants: "restaurants/getRestaurants",
@@ -30,12 +31,17 @@ export default {
   methods: {
     ...(mapActions({
       addRestaurant: "restaurants/addRestaurant",
+      addAddress: "user/addAddress"
     })),
     setupApp: function () {
       if (this.getRestaurants.length) return;
       let numberOfRestaurants = this.getRandomNumber(30, 50);
       for (let i = 0; i < numberOfRestaurants; i++) {
         this.addRestaurant(this.getRandomRestaurant());
+      }
+      let numberOfAddresses = this.getRandomNumber(2, 5);
+      for (let i = 0; i < numberOfAddresses; i++) {
+        this.addAddress(this.getRandomAddress());
       }
     },
   },

@@ -1,11 +1,15 @@
 <template>
         <div
             class="dialog-container flex-row align-items-center justify-content-center"
+            @click="$emit('close')"
         >
             <div
-                class="message-container bg-white p-20"
+                class="message-container bg-white pbh-20 pt-30"
+                @click.stop
             >
-                <div>
+                <div
+                    style="letter-spacing:1px;"
+                >
                     {{ config['message'] }}
                 </div>
                 <div
@@ -56,7 +60,7 @@ export default {
         left:0;
         width:100vw;
         height:100%;
-        background:rgba(172, 173, 173, 0.7);
+        background:rgba(gray, 0.7);
 
         .message-container{
             min-width:100px;

@@ -11,7 +11,7 @@
                 v-if="mode==='regular'"
                 class="flex-row align-items-center"
             >
-                <food-item-icon
+                <FoodItemIcon
                     :isVegetarian="isVegetarian"
                 />
                 <template
@@ -22,13 +22,15 @@
                 </template>
             </div>
             <div
-                class="mt-15"
+                class="mt-15 flex-row align-items-center"
             >
-                <food-item-icon
+                <FoodItemIcon
                     v-if="mode==='cart'"
                     :isVegetarian="isVegetarian"
+                    class="mt--5"
                 />
                 <span
+                    :class="[mode==='cart'?'ml-5':'']"
                     class="text-bold text-title"
                 >
                     {{ foodItem['label'] }}
@@ -75,7 +77,7 @@
                             v-if="itemInCart"
                         >
                             <span
-                                 @click.stop="emitEvent('reduce-count',foodItem)"
+                                 @click.stop="reduceFoodItemCount(foodItem)"
                                  class="text-secondary"
                             >
                                 <i class="fas fa-minus" />
@@ -105,17 +107,22 @@
                 </div>
             </div>
         </div>
+    <Dialog
+            v-if="isDialogActive"
+            :config="activeDialogConfig"
+            @action="handleDialogAction"
+            @close="closeDialog"
+        />
     </div>
 </template>
 
 <script>
-import { eventMixin } from "../mixins/utils/eventMixin";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import FoodItemIcon from "./FoodItemIcon.vue";
+import Dialog from "./utils/Dialog.vue";
 export default {
-  components: { FoodItemIcon },
+  components: { FoodItemIcon, Dialog },
   name: "FoodItem",
-  mixins: [eventMixin],
   props: {
     foodItem: {
       type: Object,
@@ -127,11 +134,35 @@ export default {
     }
   },
   data: function () {
-    return {};
+    return {
+      // DIALOG
+      isDialogActive: false,
+      activeDialogConfig: {},
+      dialogConfigData: {},
+      dialogConfigs: { 
+        replaceCartItems: {
+          message: "Items from another restaurant are in cart. you want to replace the items?",
+          actions: [
+            {
+              text: "Cancel",
+              action: "cancelCartItemReplace",
+              class: "text-secondary"
+            },
+            {
+              text: "Confirm",
+              action: "confirmCartItemReplace",
+              class: "text-success bordered-success-2"
+            }
+          ]
+        }
+      },
+    };
   },
   computed: {
     ...(mapGetters({
-      cartItems: "cart/getCartItems"
+      availableRestaurants: "restaurants/getRestaurants",
+      cartItems: "cart/getCartItems",
+      cartRestaurant: "cart/getCartRestaurant"
     })),
     itemInCart: function () {
       return this.cartItems.find(cartItem => cartItem["item_uuid"] === this.foodItem["uuid"]);
@@ -149,13 +180,53 @@ export default {
     }
   },
   methods: {
+    ...(mapActions({
+      resetCart: "cart/resetCart",
+      setCartRestaurant: "cart/setCartRestaurant",
+      addFoodItem: "cart/addFoodItem",
+      reduceFoodItemCount: "cart/reduceFoodItemCount",
+    })),
     handleItemCountClick: function () {
       if (!this.itemInCart) {
-        this.emitEvent("add-item", this.foodItem);
+        this.handleAddFoodItem();
       }
     },
     increaseItemCount: function () {
-      this.emitEvent("add-item", this.foodItem);
+      this.handleAddFoodItem();
+    },
+    // EVENT HANDLERS
+    handleAddFoodItem: function () {
+      let foodItem = this.foodItem;
+      if ((!this.cartRestaurant) || (this.cartRestaurant === foodItem["restaurant"])) {
+        this.setCartRestaurant(foodItem["restaurant"]);
+        this.addFoodItem(foodItem);
+      } else {
+        this.openDialog(this.dialogConfigs["replaceCartItems"], foodItem);
+      }
+    },
+    handleReplaceCartItems: function (foodItem) {
+      this.resetCart();
+      this.setCartRestaurant(foodItem["restaurant"]);
+      this.addFoodItem(foodItem);
+    }, 
+    // DIALOG METHODS
+    openDialog: function (config, data) {
+      this.activeDialogConfig = config;
+      this.dialogConfigData = data;
+      this.isDialogActive = true;
+    },
+    closeDialog: function () {
+      this.isDialogActive = false;
+    },
+    handleDialogAction: function (option) {
+      let actionHandlers = {
+        confirmCartItemReplace: this.handleReplaceCartItems,
+        cancelCartItemReplace: this.closeDialog,
+      };
+      this.closeDialog();
+      if (actionHandlers[option["action"]]) {
+        actionHandlers[option["action"]](this.dialogConfigData);
+      }
     }
   }
 };

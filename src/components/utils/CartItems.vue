@@ -4,7 +4,6 @@
         v-for="(cartItem,cartItemIndex) in cartItemss"
         :key="cartItem['uuid']+'_'+cartItemIndex"
         :food-item="getFoodItemFromCartItem(cartItem)"
-        @event-emitted="emitEvent"
         mode="cart"
     />
 </div>
@@ -12,12 +11,10 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { eventMixin } from "../../mixins/utils/eventMixin";
 import FoodItem from "../FoodItem.vue";
 
 export default {
   name: "CartItems",
-  mixins: [eventMixin],
   components: { FoodItem },
   computed: {
     ...(mapGetters({

@@ -2,19 +2,6 @@ import { foodItemModel } from "./foodItemModel";
 export const restaurantModel = {
   mixins: [foodItemModel],
   methods: {
-    getRandomLocation: function () {
-      let locations = [
-        "Kondapur",
-        "Madhapur",
-        "Gachibowli",
-        "Uppal",
-        "Miyapur",
-        "Kukatpally",
-        "Jubilee Hills",
-        "Kothaguda",
-      ];
-      return locations[this.getRandomNumber(0, locations.length)];
-    },
     getRandomRestaurant: function () {
       let restaurant = this.getRestaurantItemModel();
       let categories = Array.from(Array(this.getRandomNumber(4, 8)).keys()).map(

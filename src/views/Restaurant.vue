@@ -8,7 +8,7 @@
         class="flex-row"
       >
         <div
-          class="flex-col-3 max-allowed-container-navbar overflow-y-auto"
+          class="flex-col-3 pr-15 pt-20 max-allowed-container-navbar overflow-y-auto"
         >
           <div 
             v-for="(category,categoryIndex) in restaurantCategories"
@@ -16,14 +16,16 @@
             class="flex-row justify-content-end"
           >
             <span
-              class="mt-10 pr-10 text-capitalized text-bold"
+              :class="[activeCategory===category['uuid']?'text-warning':'']"
+              class="mt-20 pr-10 text-capitalized text-bold pointer-cursor"
+              @click="bringCategoryIntoView(category)"
             >
               {{ category['label'] }}
             </span>
           </div>
         </div>
         <div
-          class="flex-col-5 ph-30 max-allowed-container-navbar overflow-y-auto"
+          class="flex-col-5 ph-30 max-allowed-container-navbar overflow-y-auto food-items-container"
           style="border-left:1px solid lightgray;"
         >
           <div>
@@ -32,7 +34,8 @@
             >
               <div
                 :key="category['uuid']"
-              class="category-container mt-30"
+                :data-category="category['uuid']"
+                class="category-container mt-30"  
               >
                 <div
                   class="text-bold title text-capitalized"
@@ -57,7 +60,6 @@
                     >
                     <food-item
                       :food-item="foodItem"
-                      @event-emitted="handleFoodItemEvent"
                     /> 
                     </div>
                   </template>
@@ -111,11 +113,10 @@
             >
               <cart-items 
                 :restaurant="restaurant"
-                @event-emitted="handleFoodItemEvent"
               />
             </div>
             <div
-              class="cart-sum-container mt-5"
+              class="cart-sum-container mt-5 bord="
               style="border-top:2px solid black;"
             >
               <div
@@ -148,22 +149,16 @@
         </div>
       </div>
     </div>
-    <Dialog
-      v-if="isDialogActive"
-      :config="activeDialogConfig"
-      @action="handleDialogAction"
-    />
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters } from "vuex";
 import FoodItem from "../components/FoodItem.vue";
 import CartItems from "../components/utils/CartItems.vue";
-import Dialog from "../components/utils/Dialog.vue";
 export default {
   name: "Restaurant",
-  components: { FoodItem, Dialog, CartItems },
+  components: { FoodItem, CartItems },
   props: {
     restaurantId: {
       type: [Number, String],
@@ -173,28 +168,11 @@ export default {
   data: function () {
     return {
       restaurant: null,
-      // DIALOG
-      isDialogActive: false,
-      activeDialogConfig: {},
-      dialogConfigData: {},
-      dialogConfigs: { 
-        replaceCartItems: {
-          message: "Items from another restaurant are already in cart. you want to replace the items?",
-          actions: [
-            {
-              text: "Cancel",
-              action: "cancelCartItemReplace",
-              class: "text-secondary"
-            },
-            {
-              text: "Confirm",
-              action: "confirmCartItemReplace",
-              class: "text-success bordered-success-2"
-            }
-          ]
-        }
-      },
       cartItemsMaxHeight: 0,
+      // INTERSECTION OBSERVER
+      intersectionObserver: null,
+      // ACTIVE CATEGORY
+      activeCategory: null,
     };
   },
   computed: {
@@ -210,6 +188,7 @@ export default {
       return this.availableRestaurants.find(restaurant => restaurant["uuid"] === this.cartRestaurant);
     },
     restaurantCategories: function () {
+      if (!this.restaurant) return [];
       let categories = [{
         label: "Recommended",
         uuid: this.getUUID(),
@@ -222,7 +201,7 @@ export default {
       return this.cartItems.map(item => item["price"] * item["count"]).reduce((a, b) => b + a);
     }
   },
-  watch: {
+  watch: {  
     restaurantId: function () {
       this.setupRestaurant();
     },
@@ -234,19 +213,40 @@ export default {
     this.setupRestaurant();
   },
   mounted: function () {
-    this.calculateCartItemsMaxHeight();
-    window.addEventListener("resize", this.calculateCartItemsMaxHeight);
+    this.setupScrollListeners();
   },
   beforeDestroy: function () {
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+    }
     window.removeEventListener("resize", this.calculateCartItemsMaxHeight);
   },
   methods: {
-    ...(mapActions({
-      resetCart: "cart/resetCart",
-      setCartRestaurant: "cart/setCartRestaurant",
-      addFoodItem: "cart/addFoodItem",
-      reduceFoodItemCount: "cart/reduceFoodItemCount",
-    })),
+    setupScrollListeners: function () {
+      if (!this.restaurant) return;
+      this.calculateCartItemsMaxHeight();
+      window.addEventListener("resize", this.calculateCartItemsMaxHeight);
+      this.intersectionObserver = new IntersectionObserver(entries => {
+        if ((entries[0].isIntersecting)) {
+          this.activeCategory = entries[0].target.dataset.category;
+        }
+      }, { threshold: [0] });
+      const boxElList = document.querySelectorAll(".category-container");
+      boxElList.forEach((el) => {
+        this.intersectionObserver.observe(el);
+      });
+      this.activeCategory = this.restaurantCategories[0]["uuid"];
+    },
+    bringCategoryIntoView: function (category) {
+      let categoryContainer = Array.from(document.getElementsByClassName("category-container")).find(categoryContainer => {
+        return categoryContainer.dataset["category"] === category["uuid"];
+      });
+      let foodItemsContainer = document.getElementsByClassName("food-items-container")[0];
+      if (categoryContainer && foodItemsContainer) {
+        foodItemsContainer.scrollTop = categoryContainer.offsetTop - 100;
+        this.activeCategory = category["uuid"];
+      }
+    },
     setupRestaurant: function () {
       this.restaurant = this.availableRestaurants.find(restaurant => restaurant["uuid"] === this.restaurantId);
       if (!this.restaurant) {
@@ -256,29 +256,6 @@ export default {
     getFoodItemFromCartItem: function (cartItem) {
       return this.restaurant["categories"].map(category => category["items"]).flat().find(item => item["uuid"] === cartItem["item_uuid"]);
     },
-    handleFoodItemEvent: function (action, payload) {
-      let actionHandlers = {
-        "add-item": this.handleAddFoodItem,
-        "reduce-count": this.reduceFoodItemCount,
-      };
-      if (actionHandlers[action]) {
-        actionHandlers[action](payload);
-      }
-    },
-    handleAddFoodItem: function (foodItem) {
-      if ((!this.cartRestaurant) || (this.cartRestaurant === foodItem["restaurant"])) {
-        this.setCartRestaurant(foodItem["restaurant"]);
-        this.addFoodItem(foodItem);
-      } else {
-        this.openDialog(this.dialogConfigs["replaceCartItems"], foodItem);
-        // HANDLE RESTAURANT MISMATCH
-      }
-    },
-    handleReplaceCartItems: function (foodItem) {
-      this.resetCart();
-      this.setCartRestaurant(foodItem["restaurant"]);
-      this.addFoodItem(foodItem);
-    }, 
     handleCheckoutRequest: function () {
       this.routeTo("Checkout");
     },
@@ -297,25 +274,6 @@ export default {
       });
       this.cartItemsMaxHeight = window.innerHeight - heightToSubtrack;
     },
-    // DIALOG METHODS
-    openDialog: function (config, data) {
-      this.activeDialogConfig = config;
-      this.dialogConfigData = data;
-      this.isDialogActive = true;
-    },
-    closeDialog: function () {
-      this.isDialogActive = false;
-    },
-    handleDialogAction: function (option) {
-      let actionHandlers = {
-        confirmCartItemReplace: this.handleReplaceCartItems,
-        cancelCartItemReplace: this.closeDialog,
-      };
-      this.closeDialog();
-      if (actionHandlers[option["action"]]) {
-        actionHandlers[option["action"]](this.dialogConfigData);
-      }
-    }
   }
 };
 </script>
