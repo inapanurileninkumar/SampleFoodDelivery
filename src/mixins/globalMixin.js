@@ -42,6 +42,9 @@ export const globalMixin = {
     getRandomNumber: function (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     },
+    getMediaImage: function (imageLocation) {
+      return require("../assets/media" + imageLocation);
+    },
     routeTo: function (path, payload, query = null) {
       this.$router
         .replace({

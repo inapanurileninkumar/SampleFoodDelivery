@@ -54,7 +54,7 @@ export const restaurantModel = {
         label: "",
         uuid: this.getUUID(),
         open: false,
-        image: "assets/media/restaurantImages/restaurant.jpeg",
+        image: "/restaurantImages/restaurant.jpeg",
         specials: "Sea food, North Indian, and Biryani",
         deliveryTime: 0,
         location: "",
