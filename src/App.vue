@@ -20,9 +20,6 @@ export default {
     ...mapGetters({
       getRestaurants: "restaurants/getRestaurants",
     }),
-    store: function () {
-      return this.$store;
-    },
   },
   beforeMount: function () {
     this.setupApp();
